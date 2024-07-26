@@ -1,5 +1,6 @@
 # virtual environment directory
 mpmd/
+.env
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
