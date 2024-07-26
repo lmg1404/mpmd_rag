@@ -5,7 +5,7 @@ Eventually this will be routed to a database where it will be chunked for RAG
 
 from dotenv import load_dotenv
 from googleapiclient.discovery import build
-from typing import Dict, List
+from typing import Dict, List, Tuple
 import os
 
 load_dotenv()
@@ -35,10 +35,10 @@ def get_uploaded_videos_by_channel(channel: str = "moreplatesmoredates") -> Dict
     )
 
     response = request.execute()
-    response['items'][0]['contentDetails']['relatedPlaylists']['uploads']
+    return response['items'][0]['contentDetails']['relatedPlaylists']['uploads']
 
 # TODO
-def get_uploaded_videos_raw():
+def get_uploaded_videos_raw(playlist_id: str) -> List[Tuple[str, str, str]]:
     pass
 
 # TODO
