@@ -1,5 +1,6 @@
 """" 
-File for fetching and making sure the HTTP request work as intended before moving on
+File for fetching videos from a YouTube channel
+Eventually this will be routed to a database where it will be chunked for RAG
 """
 
 from dotenv import load_dotenv
@@ -14,7 +15,7 @@ API_VERSION = "v3"
 
 youtube = build(API_SERVICE, API_VERSION, developerKey=YOUTUBE_DATA_API_KEY)
 
-
+# TODO: try/except block incase the api is every down for troubleshooting
 def get_uploaded_videos_by_channel(channel: str = "moreplatesmoredates") -> Dict[str, str]:
     """ Gets the uploaded videos key from the channel
     
@@ -35,4 +36,16 @@ def get_uploaded_videos_by_channel(channel: str = "moreplatesmoredates") -> Dict
 
     response = request.execute()
     response['items'][0]['contentDetails']['relatedPlaylists']['uploads']
+
+# TODO
+def get_uploaded_videos_raw():
+    pass
+
+# TODO
+def filter_out_shorts():
+    pass
+
+# TODO
+def get_video_transcripts():
+    pass
 
