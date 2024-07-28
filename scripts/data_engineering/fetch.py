@@ -120,6 +120,3 @@ def get_video_transcripts(video_dict: List[Dict[str, str]]) -> List[Dict[str, st
         video['transcript'] = transcript
     
     return video_dict
-
-
-
