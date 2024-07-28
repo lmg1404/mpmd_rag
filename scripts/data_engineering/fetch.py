@@ -7,6 +7,7 @@ from googleapiclient.discovery import build
 import re
 from youtube_transcript_api import YouTubeTranscriptApi
 from typing import Dict, List
+from airflow.decorators import task
 import os
 
 load_dotenv()
@@ -17,7 +18,9 @@ API_VERSION = "v3"
 youtube = build(API_SERVICE, API_VERSION, developerKey=YOUTUBE_DATA_API_KEY)
 
 # TODO: try/except block incase the api is every down for troubleshooting
-def get_uploaded_videos_by_channel(channel: str = "moreplatesmoredates") -> Dict[str, str]:
+@task
+def get_uploaded_videos_by_channel(
+    channel: str = "moreplatesmoredates") -> Dict[str, str]:
     """ Gets the uploaded videos key from the channel
     
     Parameters
