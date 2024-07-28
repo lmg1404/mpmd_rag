@@ -1,10 +1,10 @@
 """" 
-File for fetching videos from a YouTube channel
-Eventually this will be routed to a database where it will be chunked for RAG
+DAG operators that will deal with accessing the HTTP requests
 """
 
 from dotenv import load_dotenv
 from googleapiclient.discovery import build
+import requests
 from typing import Dict, List, Tuple
 import os
 
@@ -38,8 +38,33 @@ def get_uploaded_videos_by_channel(channel: str = "moreplatesmoredates") -> Dict
     return response['items'][0]['contentDetails']['relatedPlaylists']['uploads']
 
 # TODO
-def get_uploaded_videos_raw(playlist_id: str) -> List[Tuple[str, str, str]]:
-    pass
+def get_uploaded_videos_raw(playlist_id: str, page_token: str = None):
+    """ Get raw videos from the uploaded playlist id
+    
+    Parameters
+    ----------
+    playlist_id : str
+        Playlist ID which will return us the list of videos
+    
+    Returns
+    -------
+    
+    """
+    videos = []
+    request = youtube.playlistItems().list(
+        part="snippet,contentDetails",
+        maxResults=50,
+        pageToken=page_token,
+        playlistId = playlist_id
+    )
+    response = request.execute()
+    next_page_token = response['nextPageToken']
+    for video in response['items']:
+        title = video['snippet']['title']
+        videoId = video['contentDetails']['videoId']
+        videos.append((title, videoId))
+    return videos, next_page_token
+        
 
 # TODO
 def filter_out_shorts():
@@ -48,4 +73,14 @@ def filter_out_shorts():
 # TODO
 def get_video_transcripts():
     pass
+
+# playlist_id = get_uploaded_videos_by_channel("moreplatesmoredates")
+# videos, next_page_token = get_uploaded_videos_raw(playlist_id)
+
+anatomy = 'https://www.youtube.com/shorts/'
+test1 = 'ed9VQ7UoTWQ'
+test2 = 'kmZ6NbLC73U'
+
+print(requests.get(anatomy + test1))
+print(requests.get(anatomy + test2))
 
