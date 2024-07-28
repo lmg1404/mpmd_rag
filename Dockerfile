@@ -1,9 +1,3 @@
-FROM python3.11.9-slim
-
-WORKDIR /app
-
-COPY requirements.txt .
-
-RUN pip install --no-cache-dir -r requirements.txt 
-
-COPY . .
+FROM apache/airflow:2.9.3
+ADD requirements.txt .
+RUN pip install -r requirements.txt

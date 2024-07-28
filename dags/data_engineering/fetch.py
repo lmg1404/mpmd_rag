@@ -20,7 +20,7 @@ youtube = build(API_SERVICE, API_VERSION, developerKey=YOUTUBE_DATA_API_KEY)
 # TODO: try/except block incase the api is every down for troubleshooting
 @task
 def get_uploaded_videos_by_channel(
-    channel: str = "moreplatesmoredates") -> Dict[str, str]:
+    channel: str = "moreplatesmoredates") -> str:
     """ Gets the uploaded videos key from the channel
     
     Parameters
@@ -42,6 +42,7 @@ def get_uploaded_videos_by_channel(
     return response['items'][0]['contentDetails']['relatedPlaylists']['uploads']
 
 # TODO
+@task
 def get_uploaded_videos_raw(playlist_id: str, page_token: str = None):
     """ Get raw videos from the uploaded playlist id
     
@@ -66,10 +67,10 @@ def get_uploaded_videos_raw(playlist_id: str, page_token: str = None):
     for video in response['items']:
         videoId = video['contentDetails']['videoId']
         videos.append(videoId)
-    return videos, next_page_token
-        
+    return videos#, next_page_token
 
 # TODO
+@task
 def filter_out_shorts(video_ids: List[str]) -> List[Dict[str, str]]:
     """ Filter raw videos into videos and leave the shorts behind using API
     
@@ -105,6 +106,7 @@ def filter_out_shorts(video_ids: List[str]) -> List[Dict[str, str]]:
     return videos
 
 # TODO
+@task
 def get_video_transcripts(video_dict: List[Dict[str, str]]) -> List[Dict[str, str]]:
     """ Get video transcripts from cleaned videos
     
