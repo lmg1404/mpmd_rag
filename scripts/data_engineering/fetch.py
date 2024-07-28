@@ -4,7 +4,7 @@ DAG operators that will deal with accessing the HTTP requests
 
 from dotenv import load_dotenv
 from googleapiclient.discovery import build
-import requests
+import re
 from typing import Dict, List, Tuple
 import os
 
@@ -60,27 +60,61 @@ def get_uploaded_videos_raw(playlist_id: str, page_token: str = None):
     response = request.execute()
     next_page_token = response['nextPageToken']
     for video in response['items']:
-        title = video['snippet']['title']
         videoId = video['contentDetails']['videoId']
-        videos.append((title, videoId))
+        videos.append(videoId)
     return videos, next_page_token
         
 
 # TODO
-def filter_out_shorts():
-    pass
+def filter_out_shorts(video_ids: List[str]) -> List[Dict[str, str]]:
+    """ Filter raw videos into videos and leave the shorts behind using API
+    
+    Parameters
+    ----------
+    video_ids : List[str]
+        Video IDs which will be going into the API
+    
+    Returns
+    -------
+        
+    """
+    videos = []
+    pattern = r"(\d+)([A-Z]?)"
+    time_factor = {'H': 3600, 'M': 60, 'S': 1}
+    request = youtube.videos().list(
+        part="snippet,contentDetails,statistics",
+        id=",".join(video_ids)
+    )
+    response = request.execute()
+    for i, item in enumerate(response['items']):
+        # print(item['snippet'])
+        # print(item['contentDetails'])
+        # print(item['statistics'])
+        matches = re.findall(pattern, item['contentDetails']['duration'])
+        cumulative_time = 0
+        for num, time in matches:
+            cumulative_time += int(num) * time_factor[time]
+        if cumulative_time > 60:
+            videos.append({
+                'video_id': video_ids[i],
+                'title': item['snippet']['title'],
+                'tags': item['snippet']['tags'],
+                'duration': str(cumulative_time)
+            })
+    return videos
 
 # TODO
 def get_video_transcripts():
     pass
 
-# playlist_id = get_uploaded_videos_by_channel("moreplatesmoredates")
-# videos, next_page_token = get_uploaded_videos_raw(playlist_id)
+playlist_id = get_uploaded_videos_by_channel("moreplatesmoredates")
+videos, next_page_token = get_uploaded_videos_raw(playlist_id)
+filter_out_shorts(videos)
 
-anatomy = 'https://www.youtube.com/shorts/'
-test1 = 'ed9VQ7UoTWQ'
-test2 = 'kmZ6NbLC73U'
+# anatomy = 'https://www.youtube.com/shorts/'
+# test1 = 'ed9VQ7UoTWQ'
+# test2 = 'kmZ6NbLC73U'
 
-print(requests.get(anatomy + test1))
-print(requests.get(anatomy + test2))
+# print(requests.get(anatomy + test1).headers)
+# print(requests.get(anatomy + test2))
 
