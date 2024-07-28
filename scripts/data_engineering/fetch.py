@@ -5,7 +5,8 @@ DAG operators that will deal with accessing the HTTP requests
 from dotenv import load_dotenv
 from googleapiclient.discovery import build
 import re
-from typing import Dict, List, Tuple
+from youtube_transcript_api import YouTubeTranscriptApi
+from typing import Dict, List
 import os
 
 load_dotenv()
@@ -76,7 +77,7 @@ def filter_out_shorts(video_ids: List[str]) -> List[Dict[str, str]]:
     
     Returns
     -------
-        
+
     """
     videos = []
     pattern = r"(\d+)([A-Z]?)"
@@ -87,9 +88,6 @@ def filter_out_shorts(video_ids: List[str]) -> List[Dict[str, str]]:
     )
     response = request.execute()
     for i, item in enumerate(response['items']):
-        # print(item['snippet'])
-        # print(item['contentDetails'])
-        # print(item['statistics'])
         matches = re.findall(pattern, item['contentDetails']['duration'])
         cumulative_time = 0
         for num, time in matches:
@@ -104,17 +102,24 @@ def filter_out_shorts(video_ids: List[str]) -> List[Dict[str, str]]:
     return videos
 
 # TODO
-def get_video_transcripts():
-    pass
+def get_video_transcripts(video_dict: List[Dict[str, str]]) -> List[Dict[str, str]]:
+    """ Get video transcripts from cleaned videos
+    
+    Parameters
+    ----------
+    video_dict : List[Dict[str, str]]
+        Video dictionary with will give us the id and place to store transcripts
+    
+    Returns
+    -------
 
-playlist_id = get_uploaded_videos_by_channel("moreplatesmoredates")
-videos, next_page_token = get_uploaded_videos_raw(playlist_id)
-filter_out_shorts(videos)
+    """
+    for video in video_dict:
+        video_id = video['video_id']
+        transcript = YouTubeTranscriptApi.get_transcript(video_id)
+        video['transcript'] = transcript
+    
+    return video_dict
 
-# anatomy = 'https://www.youtube.com/shorts/'
-# test1 = 'ed9VQ7UoTWQ'
-# test2 = 'kmZ6NbLC73U'
 
-# print(requests.get(anatomy + test1).headers)
-# print(requests.get(anatomy + test2))
 
