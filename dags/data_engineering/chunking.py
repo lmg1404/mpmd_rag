@@ -54,8 +54,8 @@ def character_chunking(youtube_video_data: List[Dict[str, str]]) -> List[Dict[st
         text = transcript['text']
         all_text += " " + text
         
-    for i in range(0, len(all_text), WORD_CHUNK_LENGTH-WORD_OVERLAP):
-        chunk = all_text[i:i+WORD_CHUNK_LENGTH]
+    for i in range(0, len(all_text), CHARACTER_CHUNK_LENGTH-CHARACTER_OVERLAP):
+        chunk = all_text[i:i+CHARACTER_CHUNK_LENGTH]
         p = create_payload(chunk, video_id=video_id, 
                            title=title, tags=tags, duration=duration)
         payload.append(p)
@@ -65,7 +65,7 @@ def character_chunking(youtube_video_data: List[Dict[str, str]]) -> List[Dict[st
 
 # TODO
 # @task
-def word_chunking(youtube_data: List[Dict[str, str]]):
+def word_chunking(youtube_video_data: List[Dict[str, str]]):
     """ Gets the uploaded videos key from the channel
     
     Parameters
@@ -76,7 +76,24 @@ def word_chunking(youtube_data: List[Dict[str, str]]):
     -------
 
     """
-    pass
+    payload = []
+    video_id = youtube_video_data['video_id']
+    title = youtube_video_data['title']
+    tags = youtube_video_data['tags']
+    duration = youtube_video_data['duration']
+    all_text = ""
+    for transcript in youtube_video_data['transcript']:
+        text = transcript['text']
+        all_text += " " + text
+    words = all_text.split()
+        
+    for i in range(0, len(words), WORD_CHUNK_LENGTH-WORD_OVERLAP):
+        chunk = ' '.join(words[i:i+WORD_CHUNK_LENGTH])
+        p = create_payload(chunk, video_id=video_id, 
+                           title=title, tags=tags, duration=duration)
+        payload.append(p)
+        
+    return payload
 
 def chunk(transcripts, chunk_func: Callable):
     """ Gets the uploaded videos key from the channel
@@ -101,7 +118,7 @@ if __name__ == "__main__":
     video_ids = fetch.get_uploaded_videos_raw(playlist_id)
     videos = fetch.filter_out_shorts(video_ids)
     transcripts = fetch.get_video_transcripts(videos)
-    payloads = chunk(transcripts, character_chunking)
+    payloads = chunk(transcripts, word_chunking)
     for p in payloads:
         print(p)
     
