@@ -63,19 +63,20 @@ def character_chunking(youtube_video_data: List[Dict[str, str]]) -> List[Dict[st
         
     return payload
         
-
 # FIXME: same as character chunking
 # @task
-def word_chunking(youtube_video_data: List[Dict[str, str]]):
+def word_chunking(youtube_video_data: List[Dict[str, str]]) -> List[Dict[str, str]]:
     """ Gets the uploaded videos key from the channel
     
     Parameters
     ----------
-
+    youtube_video_data : List[Dict[str, str]]
+        Previous iterations of the data structure to chunks
     
     Returns
     -------
-
+    List[Dict[str, str]]
+        List of chunks with their metadata
     """
     payload = []
     video_id = youtube_video_data['video_id']
@@ -96,16 +97,20 @@ def word_chunking(youtube_video_data: List[Dict[str, str]]):
         
     return payload
 
-def chunk(transcripts, chunk_func: Callable):
+def chunk(transcripts: List[Dict[str, str]], chunk_func: Callable) -> List[Dict[str, str]]:
     """ Gets the uploaded videos key from the channel
     
     Parameters
     ----------
-
+    transcripts : List[Dict[str, str]]
+        Youtube video metadata with raw api transcript
+    chunk_func : Callable
+        Chunking strategy based on a defined strategy
     
     Returns
     -------
-
+    List[Dict[str, str]]
+        List of chunks which is our payload to upload to VDB
     """
     payload = []
     for t in transcripts:
@@ -113,13 +118,14 @@ def chunk(transcripts, chunk_func: Callable):
         payload += chunked_transcript
     return payload
 
-if __name__ == "__main__":
-    import fetch
-    playlist_id = fetch.get_uploaded_videos_by_channel()
-    video_ids = fetch.get_uploaded_videos_raw(playlist_id)
-    videos = fetch.filter_out_shorts(video_ids)
-    transcripts = fetch.get_video_transcripts(videos)
-    payloads = chunk(transcripts, word_chunking)
-    for p in payloads:
-        print(p)
+# NOTE: instead of this do unit tests next time
+# if __name__ == "__main__":
+#     import fetch
+#     playlist_id = fetch.get_uploaded_videos_by_channel()
+#     video_ids = fetch.get_uploaded_videos_raw(playlist_id)
+#     videos = fetch.filter_out_shorts(video_ids)
+#     transcripts = fetch.get_video_transcripts(videos)
+#     payloads = chunk(transcripts, word_chunking)
+#     for p in payloads:
+#         print(p)
     
