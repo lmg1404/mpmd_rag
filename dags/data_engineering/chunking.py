@@ -30,7 +30,7 @@ def create_payload(chunk: str, **kwargs) -> Dict[str, str]:
 
 # FIXME: 2 for loops when this probably could be done in one
 # @task
-def character_chunking(youtube_video_data: List[Dict[str, str]]) -> List[Dict[str, str]]:
+def character_chunking(youtube_video_data: Dict[str, str]) -> List[Dict[str, str]]:
     """ Character chunks a YouTube video transcript with it's metadata
     
     Parameters
@@ -65,7 +65,7 @@ def character_chunking(youtube_video_data: List[Dict[str, str]]) -> List[Dict[st
         
 # FIXME: same as character chunking
 # @task
-def word_chunking(youtube_video_data: List[Dict[str, str]]) -> List[Dict[str, str]]:
+def word_chunking(youtube_video_data: Dict[str, str]) -> List[Dict[str, str]]:
     """ Gets the uploaded videos key from the channel
     
     Parameters
