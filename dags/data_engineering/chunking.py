@@ -1,3 +1,4 @@
+# FIXME: some repetitive parts of chunking between 2 strategies
 """
     DAG operators that help chunk for RAG
 """
@@ -63,7 +64,7 @@ def character_chunking(youtube_video_data: List[Dict[str, str]]) -> List[Dict[st
     return payload
         
 
-# TODO
+# FIXME: same as character chunking
 # @task
 def word_chunking(youtube_video_data: List[Dict[str, str]]):
     """ Gets the uploaded videos key from the channel
