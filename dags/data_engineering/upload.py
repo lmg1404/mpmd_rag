@@ -3,6 +3,7 @@
 """
 
 from dotenv import load_dotenv
+from typing import List, Tuple, Dict
 import qdrant_client
 import os
 
@@ -15,21 +16,23 @@ conn = qdrant_client.QdrantClient(
     api_key = QDRANT_API_KEY,
 )
 
-def get_embedding_model(model: str):
+def get_embedding_model(model: str) -> Tuple[int, int, int]: # place holder
     embedding_model = None
     tokenizer = None 
     vector_size = None
     return embedding_model, tokenizer, vector_size
 
-def create_collection():
+def check_collection() -> None:
     collections = conn.get_collections()
     if not collections:
         conn.create_collection(
-            collection_name="moreplatesmoredates"
-            vectors_config = qdrant_client.models.VectorParams()
+            collection_name="moreplatesmoredates",
+            vectors_config = qdrant_client.models.VectorParams(
+                size=768, distance=qdrant_client.models.Distance.COSINE
+                )
         )
 
-def vectorize(transcript, model):
+def vectorize(transcript: List[Dict[str, str]], model):
     pass
 
 def upload_to_qdrant():
