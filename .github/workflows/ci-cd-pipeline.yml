@@ -25,3 +25,10 @@ jobs:
         run: |
           pip install flake8
           flake8 .
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Transfer files to VM
+        run: echo "Deployment to VM will go here!"
+      - name: Run deployment on VM
+        run: echo "Run everything on the VM"
