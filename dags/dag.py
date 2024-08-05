@@ -27,10 +27,12 @@ def my_dag():
     video_ids = fetch.get_uploaded_videos_raw(playlist_id)
     videos = fetch.filter_out_shorts(video_ids)
     transcripts = fetch.get_video_transcripts(videos)
+    chunked_transcripts = chunking.chunk(transcripts, chunking.word_chunking)
     
     start >> playlist_id 
     playlist_id >> video_ids >> videos 
     videos >> transcripts
-    transcripts >> end
+    transcripts >> chunked_transcripts
+    chunked_transcripts >> end
 
 dag_instance = my_dag()
