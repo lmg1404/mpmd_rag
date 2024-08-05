@@ -3,7 +3,7 @@
 """
 from airflow.decorators import dag
 from airflow.operators.empty import EmptyOperator
-from datetime import datetime, timedelta
+from datetime import datetime
 # import sys
 # raise ValueError(sys.executable)
 # custom module

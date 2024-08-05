@@ -4,12 +4,14 @@
 
 from dotenv import load_dotenv
 from typing import List, Tuple, Dict
+from transformers import AutoModel, AutoTokenizer
 import qdrant_client
 import os
 
 load_dotenv()
 QDRANT_API_KEY = os.getenv('QDRANT_API_KEY')
 QDRANT_URL = os.getenv('QDRANT_URL')
+MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
 conn = qdrant_client.QdrantClient(
     url = QDRANT_URL, 
@@ -17,10 +19,10 @@ conn = qdrant_client.QdrantClient(
 )
 
 def get_embedding_model(model: str) -> Tuple[int, int, int]: # place holder
-    embedding_model = None
-    tokenizer = None 
-    vector_size = None
-    return embedding_model, tokenizer, vector_size
+    embedding_model = AutoModel.from_pretrained(model)
+    tokenizer = AutoTokenizer.from_pretrained(model) 
+    vector_size = embedding_model.config.hidden_size
+    return (embedding_model, tokenizer, vector_size)
 
 def check_collection() -> None:
     collections = conn.get_collections()
