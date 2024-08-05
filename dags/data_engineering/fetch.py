@@ -17,17 +17,18 @@ API_VERSION = "v3"
 
 youtube = build(API_SERVICE, API_VERSION, developerKey=YOUTUBE_DATA_API_KEY)
 
+
 # TODO: try/except block incase the api is every down for troubleshooting
 # @task
 def get_uploaded_videos_by_channel(
-    channel: str = "moreplatesmoredates") -> str:
+        channel: str = "moreplatesmoredates") -> str:
     """ Gets the uploaded videos key from the channel
-    
+
     Parameters
     ----------
     channel : str
         Channel name we are looking for
-    
+
     Returns
     -------
     str
@@ -39,46 +40,49 @@ def get_uploaded_videos_by_channel(
     )
 
     response = request.execute()
-    return response['items'][0]['contentDetails']['relatedPlaylists']['uploads']
+    response = response['items'][0]['contentDetails']
+    return response['relatedPlaylists']['uploads']
+
 
 # TODO
 # @task
 def get_uploaded_videos_raw(playlist_id: str, page_token: str = None):
     """ Get raw videos from the uploaded playlist id
-    
+
     Parameters
     ----------
     playlist_id : str
         Playlist ID which will return us the list of videos
-    
+
     Returns
     -------
-    
+
     """
     videos = []
     request = youtube.playlistItems().list(
         part="snippet,contentDetails",
         maxResults=50,
         pageToken=page_token,
-        playlistId = playlist_id
+        playlistId=playlist_id
     )
     response = request.execute()
     next_page_token = response['nextPageToken']
     for video in response['items']:
         videoId = video['contentDetails']['videoId']
         videos.append(videoId)
-    return videos#, next_page_token
+    return videos
+
 
 # TODO
 # @task
 def filter_out_shorts(video_ids: List[str]) -> List[Dict[str, str]]:
     """ Filter raw videos into videos and leave the shorts behind using API
-    
+
     Parameters
     ----------
     video_ids : List[str]
         Video IDs which will be going into the API
-    
+
     Returns
     -------
 
@@ -105,16 +109,18 @@ def filter_out_shorts(video_ids: List[str]) -> List[Dict[str, str]]:
             })
     return videos
 
+
 # TODO
 # @task
-def get_video_transcripts(video_dict: List[Dict[str, str]]) -> List[Dict[str, str]]:
+def get_video_transcripts(
+        video_dict: List[Dict[str, str]]) -> List[Dict[str, str]]:
     """ Get video transcripts from cleaned videos
-    
+
     Parameters
     ----------
     video_dict : List[Dict[str, str]]
-        Video dictionary with will give us the id and place to store transcripts
-    
+        Video dictionary will give us the id and place to store transcripts
+
     Returns
     -------
 
@@ -123,5 +129,5 @@ def get_video_transcripts(video_dict: List[Dict[str, str]]) -> List[Dict[str, st
         video_id = video['video_id']
         transcript = YouTubeTranscriptApi.get_transcript(video_id)
         video['transcript'] = transcript
-    
+
     return video_dict
