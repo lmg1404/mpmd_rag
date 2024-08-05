@@ -10,16 +10,17 @@ CHARACTER_OVERLAP = 20
 WORD_CHUNK_LENGTH = 100
 WORD_OVERLAP = 10
 
+
 def create_payload(chunk: str, **kwargs) -> Dict[str, str]:
-    """ Creates a payload easily from keyword arguments instead of multiple lines
-    
+    """ Creates a payload easily from keyword arguments
+
     Parameters
     ----------
-    chunk : str 
+    chunk : str
         chunk based on the version used
     **kwargs
         dict that we add to then return
-    
+
     Returns
     -------
     Dict[str, str]
@@ -28,23 +29,25 @@ def create_payload(chunk: str, **kwargs) -> Dict[str, str]:
     kwargs['chunk'] = chunk
     return kwargs
 
+
 # FIXME: 2 for loops when this probably could be done in one
 # @task
-def character_chunking(youtube_video_data: Dict[str, str]) -> List[Dict[str, str]]:
+def character_chunking(
+        youtube_video_data: Dict[str, str]) -> List[Dict[str, str]]:
     """ Character chunks a YouTube video transcript with it's metadata
-    
+
     Parameters
     ----------
-    youtube_video_data : 
+    youtube_video_data:
         Previous iterations of the data structure to chunks
-    
+
     Returns
     -------
     List[Dict[str, str]]
         List of chunks with their metadata
     """
     # keys: video_id, title, tags, 'duration', 'transcript'
-        # in transcript: it's a list with 'text', 'start', and 'duration
+    # in transcript: it's a list with 'text', 'start', and 'duration
     payload = []
     video_id = youtube_video_data['video_id']
     title = youtube_video_data['title']
@@ -54,25 +57,26 @@ def character_chunking(youtube_video_data: Dict[str, str]) -> List[Dict[str, str
     for transcript in youtube_video_data['transcript']:
         text = transcript['text']
         all_text += " " + text
-        
+
     for i in range(0, len(all_text), CHARACTER_CHUNK_LENGTH-CHARACTER_OVERLAP):
         chunk = all_text[i:i+CHARACTER_CHUNK_LENGTH]
-        p = create_payload(chunk, video_id=video_id, 
+        p = create_payload(chunk, video_id=video_id,
                            title=title, tags=tags, duration=duration)
         payload.append(p)
-        
+
     return payload
-        
+
+
 # FIXME: same as character chunking
 # @task
 def word_chunking(youtube_video_data: Dict[str, str]) -> List[Dict[str, str]]:
     """ Gets the uploaded videos key from the channel
-    
+
     Parameters
     ----------
     youtube_video_data : List[Dict[str, str]]
         Previous iterations of the data structure to chunks
-    
+
     Returns
     -------
     List[Dict[str, str]]
@@ -88,25 +92,27 @@ def word_chunking(youtube_video_data: Dict[str, str]) -> List[Dict[str, str]]:
         text = transcript['text']
         all_text += " " + text
     words = all_text.split()
-        
+
     for i in range(0, len(words), WORD_CHUNK_LENGTH-WORD_OVERLAP):
         chunk = ' '.join(words[i:i+WORD_CHUNK_LENGTH])
-        p = create_payload(chunk, video_id=video_id, 
+        p = create_payload(chunk, video_id=video_id,
                            title=title, tags=tags, duration=duration)
         payload.append(p)
-        
+
     return payload
 
-def chunk(transcripts: List[Dict[str, str]], chunk_func: Callable) -> List[Dict[str, str]]:
+
+def chunk(transcripts: List[Dict[str, str]],
+          chunk_func: Callable) -> List[Dict[str, str]]:
     """ Gets the uploaded videos key from the channel
-    
+
     Parameters
     ----------
     transcripts : List[Dict[str, str]]
         Youtube video metadata with raw api transcript
     chunk_func : Callable
         Chunking strategy based on a defined strategy
-    
+
     Returns
     -------
     List[Dict[str, str]]
@@ -128,4 +134,3 @@ def chunk(transcripts: List[Dict[str, str]], chunk_func: Callable) -> List[Dict[
 #     payloads = chunk(transcripts, word_chunking)
 #     for p in payloads:
 #         print(p)
-    
