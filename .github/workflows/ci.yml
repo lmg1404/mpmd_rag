@@ -31,7 +31,7 @@ jobs:
               pip install flake8
               flake8 .
     test:
-        needs: [setup, lint]
+        needs: setup
         runs-on: ubuntu-latest
         steps:
           - name: Run tests
