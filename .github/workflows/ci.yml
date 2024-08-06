@@ -1,9 +1,9 @@
 name: '❤️‍🩹 Continuous Integration (CI)'
 
 on:
-    push:
-        branches:
-            - main
+  push:
+      branches:
+          - main
 
 jobs:
     setup:
