@@ -1,37 +1,17 @@
-name: CI/CD Pipeline
+name: 'CI/CD Pipeline'
 on: 
   push:
     branches:
       - main
 
 jobs:
-  lint:
+  ci:
+    uses: ./github/workflows/ci.yml
+  config:
+    needs: ci
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: '3.11.9'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Lint code
-        run: |
-          pip install flake8
-          flake8 .
-
-      - name: Run tests
-        run: echo "Run python pytests here!"
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Transfer files to VM
-        run: echo "Deployment to VM will go here!"
-      - name: Run deployment on VM
-        run: echo "Run everything on the VM"
+      - name: Trying stuff out
+        run: echo "Not doing anything super seriously"
+  cd:
+    uses: ./github/workflows/cd.yml
