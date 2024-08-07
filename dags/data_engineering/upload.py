@@ -22,6 +22,27 @@ conn = qdrant_client.QdrantClient(
     api_key = QDRANT_API_KEY,
 )
 
+
+def mean_pooling(model_output, attention_mask) -> torch.Tensor:
+    """ Helper function directly from HuggingFace website
+
+    Parameters
+    ----------
+    model_output
+        Basemodel output with pooling output of model
+    attention_mask
+        Attention mask from the tokenizer of the model
+
+    Returns
+    -------
+    torch.Tensor
+        Mean outputs so that we can properly embed
+    """
+    token_embeddings = model_output[0] #First element of model_output contains all token embeddings
+    input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
+    return torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
+
+
 # @task
 def get_embedding_model(model: str
                         ) -> Tuple[PreTrainedModel, PreTrainedTokenizer, int]: # place holder
@@ -92,7 +113,10 @@ def vectorize(chunks: List[Dict[str, str]],
     vectors = []
     for chunk in chunks:
         tokenized_sentence = tokenizer(chunk['chunk'], padding=True, truncation=True, return_tensors="pt")
-        vector = embedder(**tokenized_sentence)
+        with torch.no_grad():
+            vector = embedder(**tokenized_sentence)
+            vector = mean_pooling(vector, tokenized_sentence['attention_mask'])
+        vector = vector.squeeze().tolist()
         vectors.append(vector)
     return (vectors, chunks)
 
