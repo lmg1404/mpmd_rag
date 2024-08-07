@@ -82,17 +82,16 @@ def check_collection(vector_size: int, db_conn: qdrant_client.QdrantClient) -> N
     """
     collections = db_conn.get_collections().collections
     names = [c.name for c in collections]
-    if not names:
-        db_conn.create_collection(
-            collection_name=COLLECTION_NAME,
-            vectors_config=qdrant_client.models.VectorParams(
-                size=vector_size, distance=qdrant_client.models.Distance.COSINE
-            )
+    if COLLECTION_NAME in names:
+        db_conn.delete_collection(collection_name="moreplatesmoredates")
+    db_conn.create_collection(
+        collection_name=COLLECTION_NAME,
+        vectors_config=qdrant_client.models.VectorParams(
+            size=vector_size, distance=qdrant_client.models.Distance.COSINE
         )
+    )
 
 
-# FIXME: pool outputs since it's not outputting correctly
-# FIXME: this is out putting the pooler and last hidden state outputs, fix
 #@task
 def vectorize(chunks: List[Dict[str, str]], 
         embedder: PreTrainedModel, 
@@ -142,14 +141,13 @@ def upload_to_qdrant(
     None
     """
     for i, (v, c) in enumerate(zip(vectors, chunks)):
-        print(v)
         db_conn.upsert(
             collection_name=COLLECTION_NAME,
             points=[
                 qdrant_client.models.PointStruct(
                     id=i,
                     payload=c,
-                    vector=v.tolist()
+                    vector=v
                 )
             ]
         )
@@ -171,6 +169,8 @@ if __name__ == "__main__":
     print("begin upload tasks")
     model, tokenizer, vector = get_embedding_model(MODEL)
     check_collection(vector, conn)
+    print("vectorizing")
     (vectors, chunks) = vectorize(payloads, model, tokenizer)
+    print("begin official upload")
     upload_to_qdrant(vectors, chunks, conn)
     
