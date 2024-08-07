@@ -6,7 +6,7 @@ from airflow.operators.empty import EmptyOperator
 from datetime import datetime
 from data_engineering import fetch
 from data_engineering import chunking
-# from data_engineering import upload
+from data_engineering import upload
 
 default_args = {}
 
@@ -25,12 +25,18 @@ def my_dag():
     videos = fetch.filter_out_shorts(video_ids)
     transcripts = fetch.get_video_transcripts(videos)
     chunked_transcripts = chunking.chunk(transcripts, chunking.word_chunking)
+    model, tokenizer, vector_size = upload.get_embedding_model(upload.MODEL)
+    check = upload.check_collection(vector_size, upload.conn)
+    vectors, chunks = upload.vectorize(chunked_transcripts, model, tokenizer)
+    almost_done = upload.upload_to_qdrant(vectors, chunks, upload.conn)
 
     start >> playlist_id
     playlist_id >> video_ids >> videos
     videos >> transcripts
     transcripts >> chunked_transcripts
-    chunked_transcripts >> end
+    [check, model, tokenizer, vector_size, chunked_transcripts] >> [vectors, chunks]
+    [vectors, chunks] >> almost_done
+    almost_done >> end
 
 
 dag_instance = my_dag()
