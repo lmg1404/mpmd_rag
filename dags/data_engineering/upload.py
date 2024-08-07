@@ -5,6 +5,7 @@
 # from airflow.decorators import task
 from dotenv import load_dotenv
 from typing import List, Tuple, Dict
+import qdrant_client.models
 from transformers import AutoModel, AutoTokenizer, PreTrainedModel, PreTrainedTokenizer
 import qdrant_client
 import torch
@@ -21,6 +22,7 @@ conn = qdrant_client.QdrantClient(
     api_key = QDRANT_API_KEY,
 )
 
+# @task
 def get_embedding_model(model: str
                         ) -> Tuple[PreTrainedModel, PreTrainedTokenizer, int]: # place holder
     """ Gets the model, tokenizer, and vector sizes
@@ -43,6 +45,8 @@ def get_embedding_model(model: str
         print("Unable to retrieve model: ", e)
     return (embedding_model, tokenizer, vector_size)
 
+
+# @task
 def check_collection(vector_size: int, db_conn: qdrant_client.QdrantClient) -> None:
     """ Checks if the collection exists, if not it creates it
 
@@ -55,15 +59,20 @@ def check_collection(vector_size: int, db_conn: qdrant_client.QdrantClient) -> N
     -------
     None
     """
-    collections = db_conn.get_collections()
-    if not collections:
+    collections = db_conn.get_collections().collections
+    names = [c.name for c in collections]
+    if not names:
         db_conn.create_collection(
             collection_name=COLLECTION_NAME,
-            vectors_config = qdrant_client.models.VectorParams(
+            vectors_config=qdrant_client.models.VectorParams(
                 size=vector_size, distance=qdrant_client.models.Distance.COSINE
-                )
+            )
         )
 
+
+# FIXME: pool outputs since it's not outputting correctly
+# FIXME: this is out putting the pooler and last hidden state outputs, fix
+#@task
 def vectorize(chunks: List[Dict[str, str]], 
         embedder: PreTrainedModel, 
         tokenizer: PreTrainedTokenizer
@@ -85,8 +94,9 @@ def vectorize(chunks: List[Dict[str, str]],
         tokenized_sentence = tokenizer(chunk['chunk'], padding=True, truncation=True, return_tensors="pt")
         vector = embedder(**tokenized_sentence)
         vectors.append(vector)
-    return (vector, chunks)
+    return (vectors, chunks)
 
+# @task
 def upload_to_qdrant(
         vectors: List[torch.Tensor], 
         chunks: List[Dict[str, str]], 
@@ -108,23 +118,35 @@ def upload_to_qdrant(
     None
     """
     for i, (v, c) in enumerate(zip(vectors, chunks)):
+        print(v)
         db_conn.upsert(
             collection_name=COLLECTION_NAME,
             points=[
                 qdrant_client.models.PointStruct(
                     id=i,
                     payload=c,
-                    vector=v
+                    vector=v.tolist()
                 )
             ]
-            
         )
+    return None
+
 
 if __name__ == "__main__":
     import fetch, chunking
     print("running upload.py")
+    print("fetching")
     playlist_id = fetch.get_uploaded_videos_by_channel()
     video_ids = fetch.get_uploaded_videos_raw(playlist_id)
     videos = fetch.filter_out_shorts(video_ids)
     transcripts = fetch.get_video_transcripts(videos)
-    payloads = chunk(transcripts, word_chunking)
+    
+    print("chunking")
+    payloads = chunking.chunk(transcripts, chunking.word_chunking)
+    
+    print("begin upload tasks")
+    model, tokenizer, vector = get_embedding_model(MODEL)
+    check_collection(vector, conn)
+    (vectors, chunks) = vectorize(payloads, model, tokenizer)
+    upload_to_qdrant(vectors, chunks, conn)
+    
