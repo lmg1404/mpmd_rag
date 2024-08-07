@@ -66,7 +66,7 @@ def get_uploaded_videos_raw(playlist_id: str, page_token: str = None):
         playlistId=playlist_id
     )
     response = request.execute()
-    next_page_token = response['nextPageToken']
+    # next_page_token = response['nextPageToken']
     for video in response['items']:
         videoId = video['contentDetails']['videoId']
         videos.append(videoId)

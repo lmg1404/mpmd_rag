@@ -6,7 +6,8 @@
 from dotenv import load_dotenv
 from typing import List, Tuple, Dict
 import qdrant_client.models
-from transformers import AutoModel, AutoTokenizer, PreTrainedModel, PreTrainedTokenizer
+from transformers import AutoModel, AutoTokenizer, \
+    PreTrainedModel, PreTrainedTokenizer
 import qdrant_client
 import torch
 import os
@@ -18,8 +19,8 @@ MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 COLLECTION_NAME = "moreplatesmoredates"
 
 conn = qdrant_client.QdrantClient(
-    url = QDRANT_URL, 
-    api_key = QDRANT_API_KEY,
+    url=QDRANT_URL,
+    api_key=QDRANT_API_KEY,
 )
 
 
@@ -38,14 +39,16 @@ def mean_pooling(model_output, attention_mask) -> torch.Tensor:
     torch.Tensor
         Mean outputs so that we can properly embed
     """
-    token_embeddings = model_output[0] #First element of model_output contains all token embeddings
-    input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
-    return torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
+    token_embeddings = model_output[0]
+    input_mask_expanded = attention_mask.unsqueeze(-1)\
+        .expand(token_embeddings.size()).float()
+    return torch.sum(token_embeddings * input_mask_expanded, 1) / \
+        torch.clamp(input_mask_expanded.sum(1), min=1e-9)
 
 
 # @task
 def get_embedding_model(model: str
-                        ) -> Tuple[PreTrainedModel, PreTrainedTokenizer, int]: # place holder
+                        ) -> Tuple[PreTrainedModel, PreTrainedTokenizer, int]:
     """ Gets the model, tokenizer, and vector sizes
 
     Parameters
@@ -60,7 +63,7 @@ def get_embedding_model(model: str
     """
     try:
         embedding_model = AutoModel.from_pretrained(model)
-        tokenizer = AutoTokenizer.from_pretrained(model) 
+        tokenizer = AutoTokenizer.from_pretrained(model)
         vector_size = embedding_model.config.hidden_size
     except Exception as e:
         print("Unable to retrieve model: ", e)
@@ -68,7 +71,8 @@ def get_embedding_model(model: str
 
 
 # @task
-def check_collection(vector_size: int, db_conn: qdrant_client.QdrantClient) -> None:
+def check_collection(
+        vector_size: int, db_conn: qdrant_client.QdrantClient) -> None:
     """ Checks if the collection exists, if not it creates it
 
     Parameters
@@ -92,9 +96,10 @@ def check_collection(vector_size: int, db_conn: qdrant_client.QdrantClient) -> N
     )
 
 
-#@task
-def vectorize(chunks: List[Dict[str, str]], 
-        embedder: PreTrainedModel, 
+# @task
+def vectorize(
+        chunks: List[Dict[str, str]],
+        embedder: PreTrainedModel,
         tokenizer: PreTrainedTokenizer
         ) -> Tuple[List[torch.Tensor], List[Dict[str, str]]]:
     """ Vectorizes all of our chunks
@@ -111,7 +116,9 @@ def vectorize(chunks: List[Dict[str, str]],
     """
     vectors = []
     for chunk in chunks:
-        tokenized_sentence = tokenizer(chunk['chunk'], padding=True, truncation=True, return_tensors="pt")
+        tokenized_sentence = tokenizer(
+            chunk['chunk'], padding=True, truncation=True, return_tensors="pt"
+            )
         with torch.no_grad():
             vector = embedder(**tokenized_sentence)
             vector = mean_pooling(vector, tokenized_sentence['attention_mask'])
@@ -119,10 +126,11 @@ def vectorize(chunks: List[Dict[str, str]],
         vectors.append(vector)
     return (vectors, chunks)
 
+
 # @task
 def upload_to_qdrant(
-        vectors: List[torch.Tensor], 
-        chunks: List[Dict[str, str]], 
+        vectors: List[torch.Tensor],
+        chunks: List[Dict[str, str]],
         db_conn: qdrant_client.QdrantClient
         ) -> None:
     """ Final step in our pipeline which uploads everything to qdrant
@@ -155,17 +163,18 @@ def upload_to_qdrant(
 
 
 if __name__ == "__main__":
-    import fetch, chunking
+    import fetch
+    import chunking
     print("running upload.py")
     print("fetching")
     playlist_id = fetch.get_uploaded_videos_by_channel()
     video_ids = fetch.get_uploaded_videos_raw(playlist_id)
     videos = fetch.filter_out_shorts(video_ids)
     transcripts = fetch.get_video_transcripts(videos)
-    
+
     print("chunking")
     payloads = chunking.chunk(transcripts, chunking.word_chunking)
-    
+
     print("begin upload tasks")
     model, tokenizer, vector = get_embedding_model(MODEL)
     check_collection(vector, conn)
@@ -173,4 +182,3 @@ if __name__ == "__main__":
     (vectors, chunks) = vectorize(payloads, model, tokenizer)
     print("begin official upload")
     upload_to_qdrant(vectors, chunks, conn)
-    
