@@ -14,6 +14,7 @@ load_dotenv()
 QDRANT_API_KEY = os.getenv('QDRANT_API_KEY')
 QDRANT_URL = os.getenv('QDRANT_URL')
 MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+COLLECTION_NAME = "moreplatesmoredates"
 
 conn = qdrant_client.QdrantClient(
     url = QDRANT_URL, 
@@ -57,7 +58,7 @@ def check_collection(vector_size: int, db_conn: qdrant_client.QdrantClient) -> N
     collections = db_conn.get_collections()
     if not collections:
         db_conn.create_collection(
-            collection_name="moreplatesmoredates",
+            collection_name=COLLECTION_NAME,
             vectors_config = qdrant_client.models.VectorParams(
                 size=vector_size, distance=qdrant_client.models.Distance.COSINE
                 )
@@ -106,7 +107,24 @@ def upload_to_qdrant(
     -------
     None
     """
-    pass
+    for i, (v, c) in enumerate(zip(vectors, chunks)):
+        db_conn.upsert(
+            collection_name=COLLECTION_NAME,
+            points=[
+                qdrant_client.models.PointStruct(
+                    id=i,
+                    payload=c,
+                    vector=v
+                )
+            ]
+            
+        )
 
 if __name__ == "__main__":
+    import fetch, chunking
     print("running upload.py")
+    playlist_id = fetch.get_uploaded_videos_by_channel()
+    video_ids = fetch.get_uploaded_videos_raw(playlist_id)
+    videos = fetch.filter_out_shorts(video_ids)
+    transcripts = fetch.get_video_transcripts(videos)
+    payloads = chunk(transcripts, word_chunking)
