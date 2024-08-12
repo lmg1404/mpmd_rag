@@ -2,7 +2,7 @@
     DAG operators to upload data onto a Qdrant server
 """
 
-# from airflow.decorators import task
+from airflow.decorators import task
 from dotenv import load_dotenv
 from typing import List, Tuple, Dict
 import qdrant_client.models
@@ -46,7 +46,7 @@ def mean_pooling(model_output, attention_mask) -> torch.Tensor:
         torch.clamp(input_mask_expanded.sum(1), min=1e-9)
 
 
-# @task
+@task
 def get_embedding_model(model: str
                         ) -> Tuple[PreTrainedModel, PreTrainedTokenizer, int]:
     """ Gets the model, tokenizer, and vector sizes
@@ -70,7 +70,7 @@ def get_embedding_model(model: str
     return (embedding_model, tokenizer, vector_size)
 
 
-# @task
+@task
 def check_collection(
         vector_size: int, db_conn: qdrant_client.QdrantClient) -> None:
     """ Checks if the collection exists, if not it creates it
@@ -96,7 +96,7 @@ def check_collection(
     )
 
 
-# @task
+@task
 def vectorize(
         chunks: List[Dict[str, str]],
         embedder: PreTrainedModel,
@@ -127,7 +127,7 @@ def vectorize(
     return (vectors, chunks)
 
 
-# @task
+@task
 def upload_to_qdrant(
         vectors: List[torch.Tensor],
         chunks: List[Dict[str, str]],

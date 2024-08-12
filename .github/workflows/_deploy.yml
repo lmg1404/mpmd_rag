@@ -1,0 +1,55 @@
+# GPT created
+name: Deploy to AWS ECR and EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: <your-region>
+
+      - name: Login to Amazon ECR
+        run: |
+          aws ecr get-login-password --region <your-region> | docker login --username AWS --password-stdin <your-account-id>.dkr.ecr.<your-region>.amazonaws.com
+
+      - name: Build Airflow Docker image
+        run: |
+          docker build -t my-airflow-repo:latest -f airflow/Dockerfile .
+          docker tag my-airflow-repo:latest <your-account-id>.dkr.ecr.<your-region>.amazonaws.com/my-airflow-repo:latest
+
+      - name: Push Airflow Docker image to ECR
+        run: |
+          docker push <your-account-id>.dkr.ecr.<your-region>.amazonaws.com/my-airflow-repo:latest
+
+      - name: Build FastAPI Docker image
+        run: |
+          docker build -t my-fastapi-repo:latest -f fastapi/Dockerfile .
+          docker tag my-fastapi-repo:latest <your-account-id>.dkr.ecr.<your-region>.amazonaws.com/my-fastapi-repo:latest
+
+      - name: Push FastAPI Docker image to ECR
+        run: |
+          docker push <your-account-id>.dkr.ecr.<your-region>.amazonaws.com/my-fastapi-repo:latest
+
+      - name: SSH to EC2 and deploy containers
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ${GITHUB_WORKSPACE}/your-key.pem ec2-user@<your-ec2-public-dns> << EOF
+            docker pull <your-account-id>.dkr.ecr.<your-region>.amazonaws.com/my-airflow-repo:latest
+            docker pull <your-account-id>.dkr.ecr.<your-region>.amazonaws.com/my-fastapi-repo:latest
+            docker stop airflow || true && docker rm airflow || true
+            docker stop fastapi || true && docker rm fastapi || true
+            docker run -d --name airflow -p 8080:8080 <your-account-id>.dkr.ecr.<your-region>.amazonaws.com/my-airflow-repo:latest
+            docker run -d --name fastapi -p 8000:8000 <your-account-id>.dkr.ecr.<your-region>.amazonaws.com/my-fastapi-repo:latest
+          EOF
