@@ -96,7 +96,8 @@ def check_collection(
 
 @task
 def vectorize(
-        chunks: List[Dict[str, str]]
+        chunks: List[Dict[str, str]],
+        model: str
         ) -> Dict[str, Union[List[torch.Tensor], List[Dict[str, str]]]]:
     """ Vectorizes all of our chunks
 

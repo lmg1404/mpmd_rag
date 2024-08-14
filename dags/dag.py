@@ -27,7 +27,7 @@ def my_dag():
     chunked_transcripts = chunking.chunk(transcripts, chunking.word_chunking)
     vector_size = upload.get_embedding_model(upload.MODEL)
     check = upload.check_collection(vector_size, upload.conn)
-    chunk_dict = upload.vectorize(chunked_transcripts)
+    chunk_dict = upload.vectorize(chunked_transcripts, upload.MODEL)
     almost_done = upload.upload_to_qdrant(chunk_dict["vectors"], chunk_dict["chunks"], upload.conn)
 
     start >> playlist_id
