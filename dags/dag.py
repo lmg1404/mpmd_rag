@@ -11,8 +11,9 @@ from data_engineering import upload
 default_args = {
     'owner': 'Luis Gallego',
     'depends_on_past': False,
-    'start_date': datetime(2024, 8, 20),
+    'start_date': datetime(2024, 8, 10),
     'schedule_interval': '0 0 * * *',
+    'catchup': False,
     'email_on_failure': False,
     'email_on_retry': False,
     'retries': 5,
@@ -21,8 +22,8 @@ default_args = {
 
 
 @dag(
-    dag_id='extract_and_chunk_youtube_transcripts_v1.6',
-    default_args=default_args
+    dag_id='extract_and_chunk_youtube_transcripts_v1.7',
+    default_args=default_args,
 )
 def my_dag():
     start = EmptyOperator(task_id='start')

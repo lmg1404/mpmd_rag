@@ -3,14 +3,14 @@
     DAG operators that help chunk for RAG
 """
 from typing import List, Dict, Callable
-# from airflow.decorators import task
+from airflow.decorators import task
 
 CHARACTER_CHUNK_LENGTH = 500
 CHARACTER_OVERLAP = 20
 WORD_CHUNK_LENGTH = 100
 WORD_OVERLAP = 10
 
-# @task
+@task
 def create_payload(chunk: str, **kwargs) -> Dict[str, str]:
     """ Creates a payload easily from keyword arguments
 
@@ -31,7 +31,7 @@ def create_payload(chunk: str, **kwargs) -> Dict[str, str]:
 
 
 # FIXME: 2 for loops when this probably could be done in one
-# @task
+@task
 def character_chunking(
         youtube_video_data: Dict[str, str]) -> List[Dict[str, str]]:
     """ Character chunks a YouTube video transcript with it's metadata
@@ -68,7 +68,7 @@ def character_chunking(
 
 
 # FIXME: same as character chunking
-# @task
+@task
 def word_chunking(youtube_video_data: Dict[str, str]) -> List[Dict[str, str]]:
     """ Gets the uploaded videos key from the channel
 
@@ -102,7 +102,7 @@ def word_chunking(youtube_video_data: Dict[str, str]) -> List[Dict[str, str]]:
     return payload
 
 
-# @task
+@task
 def chunk(transcripts: List[Dict[str, str]],
           chunk_func: Callable) -> List[Dict[str, str]]:
     """ Gets the uploaded videos key from the channel
@@ -126,12 +126,15 @@ def chunk(transcripts: List[Dict[str, str]],
     return payload
 
 # NOTE: instead of this do unit tests next time
-# if __name__ == "__main__":
-#     import fetch
-#     playlist_id = fetch.get_uploaded_videos_by_channel()
-#     video_ids = fetch.get_uploaded_videos_raw(playlist_id)
-#     videos = fetch.filter_out_shorts(video_ids)
-#     transcripts = fetch.get_video_transcripts(videos)
-#     payloads = chunk(transcripts, word_chunking)
-#     for p in payloads:
-#         print(p)
+if __name__ == "__main__":
+    import fetch
+    print("running upload.py")
+    print("fetching")
+    playlist_id = fetch.get_uploaded_videos_by_channel()
+    video_ids = fetch.get_uploaded_videos_raw(playlist_id)
+    videos = fetch.filter_out_shorts(video_ids)
+    transcripts = fetch.get_video_transcripts(videos)
+
+    print("chunking")
+    payloads = chunk(transcripts, word_chunking)
+    
