@@ -7,19 +7,22 @@ from googleapiclient.discovery import build
 import re
 from youtube_transcript_api import YouTubeTranscriptApi
 from typing import Dict, List
-from airflow.decorators import task
+# from airflow.decorators import task
 import os
+import json
+import utils
 
 load_dotenv()
 YOUTUBE_DATA_API_KEY = os.getenv('YOUTUBE_DATA_API_KEY')
 API_SERVICE = "youtube"
 API_VERSION = "v3"
+PATH = utils.fix_path()
 
 youtube = build(API_SERVICE, API_VERSION, developerKey=YOUTUBE_DATA_API_KEY)
 
 
 # TODO: try/except block incase the api is every down for troubleshooting
-@task
+# @task
 def get_uploaded_videos_by_channel(
         channel: str = "moreplatesmoredates") -> str:
     """ Gets the uploaded videos key from the channel
@@ -45,7 +48,7 @@ def get_uploaded_videos_by_channel(
 
 
 # TODO
-@task
+# @task
 def get_uploaded_videos_raw(playlist_id: str, page_token: str = None):
     """ Get raw videos from the uploaded playlist id
 
@@ -70,11 +73,13 @@ def get_uploaded_videos_raw(playlist_id: str, page_token: str = None):
     for video in response['items']:
         videoId = video['contentDetails']['videoId']
         videos.append(videoId)
+        
+    
     return videos
 
 
 # TODO
-@task
+# @task
 def filter_out_shorts(video_ids: List[str]) -> List[Dict[str, str]]:
     """ Filter raw videos into videos and leave the shorts behind using API
 
@@ -111,7 +116,7 @@ def filter_out_shorts(video_ids: List[str]) -> List[Dict[str, str]]:
 
 
 # TODO
-@task
+# @task
 def get_video_transcripts(
         video_dict: List[Dict[str, str]]) -> List[Dict[str, str]]:
     """ Get video transcripts from cleaned videos
@@ -133,7 +138,8 @@ def get_video_transcripts(
     return video_dict
 
 if __name__ == "__main__":
-    playlist_id = get_uploaded_videos_by_channel()
-    video_ids = get_uploaded_videos_raw(playlist_id)
-    videos = filter_out_shorts(video_ids)
-    transcripts = get_video_transcripts(videos)
+    print(utils.fix_path())
+    # playlist_id = get_uploaded_videos_by_channel() 
+    # video_ids = get_uploaded_videos_raw(playlist_id)
+    # videos = filter_out_shorts(video_ids)
+    # transcripts = get_video_transcripts(videos)

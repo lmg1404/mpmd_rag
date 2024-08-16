@@ -16,8 +16,8 @@ default_args = {
     'catchup': False,
     'email_on_failure': False,
     'email_on_retry': False,
-    'retries': 5,
-    'retry_delay': timedelta(minutes=2)
+    # 'retries': 5,
+    # 'retry_delay': timedelta(minutes=2)
 }
 
 
@@ -28,7 +28,8 @@ default_args = {
 def my_dag():
     start = EmptyOperator(task_id='start')
     end = EmptyOperator(task_id='end')
-
+    
+    # FIXME: redo all functions so data isn't passed through xcoms.
     playlist_id = fetch.get_uploaded_videos_by_channel()
     video_ids = fetch.get_uploaded_videos_raw(playlist_id)
     videos = fetch.filter_out_shorts(video_ids)

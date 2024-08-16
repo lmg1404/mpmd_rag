@@ -4,13 +4,18 @@
 """
 from typing import List, Dict, Callable
 from airflow.decorators import task
+import utils
 
 CHARACTER_CHUNK_LENGTH = 500
 CHARACTER_OVERLAP = 20
 WORD_CHUNK_LENGTH = 100
 WORD_OVERLAP = 10
+PATH = utils.fix_path()
 
-@task
+
+# -----------------------------
+#         HELPER FUNCS
+# -----------------------------
 def create_payload(chunk: str, **kwargs) -> Dict[str, str]:
     """ Creates a payload easily from keyword arguments
 
@@ -31,7 +36,6 @@ def create_payload(chunk: str, **kwargs) -> Dict[str, str]:
 
 
 # FIXME: 2 for loops when this probably could be done in one
-@task
 def character_chunking(
         youtube_video_data: Dict[str, str]) -> List[Dict[str, str]]:
     """ Character chunks a YouTube video transcript with it's metadata
@@ -68,7 +72,6 @@ def character_chunking(
 
 
 # FIXME: same as character chunking
-@task
 def word_chunking(youtube_video_data: Dict[str, str]) -> List[Dict[str, str]]:
     """ Gets the uploaded videos key from the channel
 
@@ -101,6 +104,10 @@ def word_chunking(youtube_video_data: Dict[str, str]) -> List[Dict[str, str]]:
 
     return payload
 
+
+# -----------------------------
+#         TASK FUNCS
+# -----------------------------
 
 @task
 def chunk(transcripts: List[Dict[str, str]],
