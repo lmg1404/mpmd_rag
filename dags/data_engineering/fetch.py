@@ -23,8 +23,7 @@ youtube = build(API_SERVICE, API_VERSION, developerKey=YOUTUBE_DATA_API_KEY)
 
 # TODO: try/except block incase the api is every down for troubleshooting
 # @task
-def get_uploaded_videos_by_channel(
-        channel: str = "moreplatesmoredates") -> str:
+def get_uploaded_videos_by_channel(channel: str = "moreplatesmoredates") -> str:
     """ Gets the uploaded videos key from the channel
 
     Parameters
@@ -49,7 +48,7 @@ def get_uploaded_videos_by_channel(
 
 # TODO
 # @task
-def get_uploaded_videos_raw(playlist_id: str, page_token: str = None):
+def get_uploaded_videos_raw(playlist_id: str, page_token: str = None) -> str:
     """ Get raw videos from the uploaded playlist id
 
     Parameters
@@ -58,6 +57,8 @@ def get_uploaded_videos_raw(playlist_id: str, page_token: str = None):
         Playlist ID which will return us the list of videos
 
     Returns
+    str
+        Gives path of data file
     -------
 
     """
@@ -74,27 +75,26 @@ def get_uploaded_videos_raw(playlist_id: str, page_token: str = None):
         videoId = video['contentDetails']['videoId']
         videos.append(videoId)
     
-    folder_name = "raw_videos"
-    dump = utils.write_file(DATA_PATH, folder_name, videos)
+    file_name = "raw_videos"
+    return utils.write_file(DATA_PATH, file_name, videos)
     
-    return dump
-
 
 # TODO
 # @task
-def filter_out_shorts(video_ids: List[str]) -> List[Dict[str, str]]:
+def filter_out_shorts(raw_data_path: str) -> str:
     """ Filter raw videos into videos and leave the shorts behind using API
 
     Parameters
     ----------
-    video_ids : List[str]
-        Video IDs which will be going into the API
+    raw_data_path : str
+        path where raw data is located
 
     Returns
     -------
-
+    str
+        Returns the data location of our filtered data
     """
-    
+    video_ids = utils.open_file(raw_data_path)
     videos = []
     pattern = r"(\d+)([A-Z]?)"
     time_factor = {'H': 3600, 'M': 60, 'S': 1}
@@ -116,38 +116,36 @@ def filter_out_shorts(video_ids: List[str]) -> List[Dict[str, str]]:
                 'duration': str(cumulative_time)
             })
             
-    folder_name = "raw_videos"
-    dump = os.path.join(DATA_PATH, folder_name)
-    with open(dump, 'w') as file: 
-        json.dump(videos, file, indent=4)
-
-    return videos
+    file_name = "filter_videos"
+    
+    return utils.write_file(DATA_PATH, file_name, videos)
 
 
-# TODO
 # @task
-def get_video_transcripts(
-        video_dict: List[Dict[str, str]]) -> List[Dict[str, str]]:
+def get_video_transcripts(filtered_path: str) -> str:
     """ Get video transcripts from cleaned videos
 
     Parameters
     ----------
-    video_dict : List[Dict[str, str]]
-        Video dictionary will give us the id and place to store transcripts
+    filtered_path : str
+        Path location of our filtered data
 
     Returns
     -------
-
+    str
+        Returns path of transcripted data
     """
+    video_dict = utils.open_file(filtered_path)
     for video in video_dict:
         video_id = video['video_id']
         transcript = YouTubeTranscriptApi.get_transcript(video_id)
         video['transcript'] = transcript
-
-    return video_dict
+    
+    file_name = "transcripted_videos"
+    return utils.write_file(DATA_PATH, file_name, video_dict)
 
 if __name__ == "__main__":
     playlist_id = get_uploaded_videos_by_channel() 
     raw_vid_path = get_uploaded_videos_raw(playlist_id)
-    filter_out_shorts(raw_vid_path)
-    # transcripts = get_video_transcripts(videos)
+    filtered_path = filter_out_shorts(raw_vid_path)
+    transcripts = get_video_transcripts(filtered_path)

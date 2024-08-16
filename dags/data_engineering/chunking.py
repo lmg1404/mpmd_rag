@@ -137,10 +137,10 @@ if __name__ == "__main__":
     import fetch
     print("running upload.py")
     print("fetching")
-    playlist_id = fetch.get_uploaded_videos_by_channel()
-    video_ids = fetch.get_uploaded_videos_raw(playlist_id)
-    videos = fetch.filter_out_shorts(video_ids)
-    transcripts = fetch.get_video_transcripts(videos)
+    playlist_id = fetch.get_uploaded_videos_by_channel() 
+    raw_vid_path = fetch.get_uploaded_videos_raw(playlist_id)
+    filtered_path = fetch.filter_out_shorts(raw_vid_path)
+    transcripts = fetch.get_video_transcripts(filtered_path)
 
     print("chunking")
     payloads = chunk(transcripts, word_chunking)
