@@ -3,7 +3,7 @@
     DAG operators that help chunk for RAG
 """
 from typing import List, Dict, Callable
-from airflow.decorators import task
+# from airflow.decorators import task
 import utils
 
 CHARACTER_CHUNK_LENGTH = 500
@@ -109,28 +109,31 @@ def word_chunking(youtube_video_data: Dict[str, str]) -> List[Dict[str, str]]:
 #         TASK FUNCS
 # -----------------------------
 
-@task
-def chunk(transcripts: List[Dict[str, str]],
-          chunk_func: Callable) -> List[Dict[str, str]]:
+# @task
+def chunk(transcripts_path: str,
+          chunk_func: Callable) -> str:
     """ Gets the uploaded videos key from the channel
 
     Parameters
     ----------
-    transcripts : List[Dict[str, str]]
-        Youtube video metadata with raw api transcript
+    transcripts : str
+        Youtube video metadata with raw api transcript path location
     chunk_func : Callable
         Chunking strategy based on a defined strategy
 
     Returns
     -------
-    List[Dict[str, str]]
-        List of chunks which is our payload to upload to VDB
+    str
+        Chunk path which is our payload to upload to VDB
     """
+    transcripts = utils.open_file(transcripts_path)
     payload = []
     for t in transcripts:
         chunked_transcript = chunk_func(t)
         payload += chunked_transcript
-    return payload
+        
+    file_name = "chunked_transcripts"
+    return utils.write_file(DATA_PATH, file_name, payload)
 
 # NOTE: instead of this do unit tests next time
 if __name__ == "__main__":
