@@ -12,6 +12,7 @@ default_args = {
     'owner': 'Luis Gallego',
     'depends_on_past': False,
     'start_date': datetime(2024, 8, 20),
+    'schedule_interval': '0 0 * * *',
     'email_on_failure': False,
     'email_on_retry': False,
     'retries': 5,
@@ -22,7 +23,6 @@ default_args = {
 @dag(
     dag_id='extract_and_chunk_youtube_transcripts_v1.6',
     default_args=default_args
-    # schedule_interval='@daily'
 )
 def my_dag():
     start = EmptyOperator(task_id='start')
