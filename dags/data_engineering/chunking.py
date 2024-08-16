@@ -3,8 +3,8 @@
     DAG operators that help chunk for RAG
 """
 from typing import List, Dict, Callable
-# from airflow.decorators import task
-import utils
+from airflow.decorators import task
+from data_engineering import utils
 
 CHARACTER_CHUNK_LENGTH = 500
 CHARACTER_OVERLAP = 20
@@ -109,7 +109,7 @@ def word_chunking(youtube_video_data: Dict[str, str]) -> List[Dict[str, str]]:
 #         TASK FUNCS
 # -----------------------------
 
-# @task
+@task
 def chunk(transcripts_path: str,
           chunk_func: Callable) -> str:
     """ Gets the uploaded videos key from the channel

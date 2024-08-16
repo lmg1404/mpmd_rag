@@ -7,10 +7,10 @@ from googleapiclient.discovery import build
 import re
 from youtube_transcript_api import YouTubeTranscriptApi
 from typing import Dict, List
-# from airflow.decorators import task
+from airflow.decorators import task
 import os
 import json
-import utils
+from data_engineering import utils
 
 load_dotenv()
 YOUTUBE_DATA_API_KEY = os.getenv('YOUTUBE_DATA_API_KEY')
@@ -22,7 +22,7 @@ youtube = build(API_SERVICE, API_VERSION, developerKey=YOUTUBE_DATA_API_KEY)
 
 
 # TODO: try/except block incase the api is every down for troubleshooting
-# @task
+@task
 def get_uploaded_videos_by_channel(channel: str = "moreplatesmoredates") -> str:
     """ Gets the uploaded videos key from the channel
 
@@ -46,8 +46,7 @@ def get_uploaded_videos_by_channel(channel: str = "moreplatesmoredates") -> str:
     return response['relatedPlaylists']['uploads']
 
 
-# TODO
-# @task
+@task
 def get_uploaded_videos_raw(playlist_id: str, page_token: str = None) -> str:
     """ Get raw videos from the uploaded playlist id
 
@@ -79,8 +78,7 @@ def get_uploaded_videos_raw(playlist_id: str, page_token: str = None) -> str:
     return utils.write_file(DATA_PATH, file_name, videos)
     
 
-# TODO
-# @task
+@task
 def filter_out_shorts(raw_data_path: str) -> str:
     """ Filter raw videos into videos and leave the shorts behind using API
 
@@ -121,7 +119,7 @@ def filter_out_shorts(raw_data_path: str) -> str:
     return utils.write_file(DATA_PATH, file_name, videos)
 
 
-# @task
+@task
 def get_video_transcripts(filtered_path: str) -> str:
     """ Get video transcripts from cleaned videos
 

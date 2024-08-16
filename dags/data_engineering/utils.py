@@ -13,12 +13,12 @@ def create_data_folder() -> str:
   
   return new_path
 
-def open_file(path) -> str:
+def open_file(path: str) -> str:
   with open(path, 'r') as f:
     data = json.load(f)
   return data
 
-def write_file(base_path, file_name,data) -> str:
+def write_file(base_path: str, file_name: str, data) -> str:
   dump = os.path.join(base_path, file_name)
   with open(dump, 'w') as f: 
       json.dump(data, f, indent=4)
