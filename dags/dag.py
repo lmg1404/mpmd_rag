@@ -22,7 +22,7 @@ default_args = {
 
 
 @dag(
-    dag_id='extract_and_chunk_youtube_transcripts_v1.7',
+    dag_id='extract_and_chunk_youtube_transcripts_v2.0',
     default_args=default_args,
 )
 def my_dag():

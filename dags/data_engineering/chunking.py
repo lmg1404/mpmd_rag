@@ -138,7 +138,7 @@ def chunk(transcripts_path: str,
 # NOTE: instead of this do unit tests next time
 if __name__ == "__main__":
     import fetch
-    print("running upload.py")
+    print("running chunking.py")
     print("fetching")
     playlist_id = fetch.get_uploaded_videos_by_channel() 
     raw_vid_path = fetch.get_uploaded_videos_raw(playlist_id)
