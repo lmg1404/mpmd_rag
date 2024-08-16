@@ -94,8 +94,7 @@ def filter_out_shorts(video_ids: List[str]) -> List[Dict[str, str]]:
     -------
 
     """
-    with open(video_ids, 'r') as file:
-        video_ids = json.load(file)
+    
     videos = []
     pattern = r"(\d+)([A-Z]?)"
     time_factor = {'H': 3600, 'M': 60, 'S': 1}
