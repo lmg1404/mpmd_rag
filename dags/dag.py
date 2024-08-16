@@ -9,20 +9,20 @@ from data_engineering import chunking
 from data_engineering import upload
 
 default_args = {
-    # 'owner': 'Luis Gallego',
-    # 'depends_on_past': False,
-    # 'start_date': datetime(2024, 8, 16),
-    # 'schedule_interval': '0 0 * * *',
-    # 'catchup': False,
-    # 'email_on_failure': False,
-    # 'email_on_retry': False,
-    # 'retries': 5,
-    # 'retry_delay': timedelta(minutes=2)
+    'owner': 'Luis Gallego',
+    'depends_on_past': False,
+    'start_date': datetime(2024, 8, 16),
+    'schedule_interval': '0 0 * * *',
+    'catchup': False,
+    'email_on_failure': False,
+    'email_on_retry': False,
+    'retries': 5,
+    'retry_delay': timedelta(minutes=2)
 }
 
 
 @dag(
-    dag_id='extract_and_chunk_youtube_transcripts_v2.0',
+    dag_id='extract_and_chunk_youtube_transcripts_v2.1',
     default_args=default_args,
 )
 def my_dag():
