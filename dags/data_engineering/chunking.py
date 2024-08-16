@@ -10,7 +10,7 @@ CHARACTER_CHUNK_LENGTH = 500
 CHARACTER_OVERLAP = 20
 WORD_CHUNK_LENGTH = 100
 WORD_OVERLAP = 10
-PATH = utils.fix_path()
+DATA_PATH = utils.create_data_folder()
 
 
 # -----------------------------

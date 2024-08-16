@@ -16,7 +16,7 @@ load_dotenv()
 YOUTUBE_DATA_API_KEY = os.getenv('YOUTUBE_DATA_API_KEY')
 API_SERVICE = "youtube"
 API_VERSION = "v3"
-PATH = utils.fix_path()
+DATA_PATH = utils.create_data_folder()
 
 youtube = build(API_SERVICE, API_VERSION, developerKey=YOUTUBE_DATA_API_KEY)
 
@@ -73,9 +73,11 @@ def get_uploaded_videos_raw(playlist_id: str, page_token: str = None):
     for video in response['items']:
         videoId = video['contentDetails']['videoId']
         videos.append(videoId)
-        
     
-    return videos
+    folder_name = "raw_videos"
+    dump = utils.write_file(DATA_PATH, folder_name, videos)
+    
+    return dump
 
 
 # TODO
@@ -92,6 +94,8 @@ def filter_out_shorts(video_ids: List[str]) -> List[Dict[str, str]]:
     -------
 
     """
+    with open(video_ids, 'r') as file:
+        video_ids = json.load(file)
     videos = []
     pattern = r"(\d+)([A-Z]?)"
     time_factor = {'H': 3600, 'M': 60, 'S': 1}
@@ -112,6 +116,12 @@ def filter_out_shorts(video_ids: List[str]) -> List[Dict[str, str]]:
                 'tags': item['snippet']['tags'],
                 'duration': str(cumulative_time)
             })
+            
+    folder_name = "raw_videos"
+    dump = os.path.join(DATA_PATH, folder_name)
+    with open(dump, 'w') as file: 
+        json.dump(videos, file, indent=4)
+
     return videos
 
 
@@ -138,8 +148,7 @@ def get_video_transcripts(
     return video_dict
 
 if __name__ == "__main__":
-    print(utils.fix_path())
-    # playlist_id = get_uploaded_videos_by_channel() 
-    # video_ids = get_uploaded_videos_raw(playlist_id)
-    # videos = filter_out_shorts(video_ids)
+    playlist_id = get_uploaded_videos_by_channel() 
+    raw_vid_path = get_uploaded_videos_raw(playlist_id)
+    filter_out_shorts(raw_vid_path)
     # transcripts = get_video_transcripts(videos)
