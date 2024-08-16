@@ -3,17 +3,25 @@
 """
 from airflow.decorators import dag
 from airflow.operators.empty import EmptyOperator
-from datetime import datetime
+from datetime import datetime, timedelta
 from data_engineering import fetch
 from data_engineering import chunking
 from data_engineering import upload
 
-default_args = {}
+default_args = {
+    'owner': 'Luis Gallego',
+    'depends_on_past': False,
+    'start_date': datetime(2024, 8, 20),
+    'email_on_failure': False,
+    'email_on_retry': False,
+    'retries': 5,
+    'retry_delay': timedelta(minutes=2)
+}
 
 
 @dag(
     dag_id='extract_and_chunk_youtube_transcripts_v1.6',
-    start_date=None, # datetime(2024, 8, 14),
+    default_args=default_args
     # schedule_interval='@daily'
 )
 def my_dag():

@@ -2,7 +2,7 @@
     DAG operators to upload data onto a Qdrant server
 """
 
-from airflow.decorators import task
+# from airflow.decorators import task
 from dotenv import load_dotenv
 from typing import List, Tuple, Dict, Union
 import qdrant_client.models
@@ -46,7 +46,7 @@ def mean_pooling(model_output, attention_mask) -> torch.Tensor:
         torch.clamp(input_mask_expanded.sum(1), min=1e-9)
 
 
-@task
+# @task
 def get_embedding_model(model: str) -> int:
     """ Gets the model, tokenizer, and vector sizes
 
@@ -68,7 +68,7 @@ def get_embedding_model(model: str) -> int:
     return vector_size
 
 
-@task
+# @task
 def check_collection(
         vector_size: int, db_conn: qdrant_client.QdrantClient) -> None:
     """ Checks if the collection exists, if not it creates it
@@ -94,7 +94,7 @@ def check_collection(
     )
 
 
-@task
+# @task
 def vectorize(
         chunks: List[Dict[str, str]],
         model: str
@@ -129,7 +129,7 @@ def vectorize(
         }
 
 
-@task
+# @task
 def upload_to_qdrant(
         vectors: List[torch.Tensor],
         chunks: List[Dict[str, str]],
@@ -165,23 +165,22 @@ def upload_to_qdrant(
 
 
 if __name__ == "__main__":
-    # import fetch
-    # import chunking
-    # print("running upload.py")
-    # print("fetching")
-    # playlist_id = fetch.get_uploaded_videos_by_channel()
-    # video_ids = fetch.get_uploaded_videos_raw(playlist_id)
-    # videos = fetch.filter_out_shorts(video_ids)
-    # transcripts = fetch.get_video_transcripts(videos)
+    import fetch
+    import chunking
+    print("running upload.py")
+    print("fetching")
+    playlist_id = fetch.get_uploaded_videos_by_channel()
+    video_ids = fetch.get_uploaded_videos_raw(playlist_id)
+    videos = fetch.filter_out_shorts(video_ids)
+    transcripts = fetch.get_video_transcripts(videos)
 
-    # print("chunking")
-    # payloads = chunking.chunk(transcripts, chunking.word_chunking)
+    print("chunking")
+    payloads = chunking.chunk(transcripts, chunking.word_chunking)
 
-    # print("begin upload tasks")
-    # model, tokenizer, vector = get_embedding_model(MODEL)
-    # check_collection(vector, conn)
-    # print("vectorizing")
-    # (vectors, chunks) = vectorize(payloads, model, tokenizer)
-    # print("begin official upload")
-    # upload_to_qdrant(vectors, chunks, conn)
-    check_collection(100, conn)
+    print("begin upload tasks")
+    vector_size = get_embedding_model(MODEL)
+    check_collection(vector_size, conn)
+    print("vectorizing")
+    chunk_dict = vectorize(payloads, MODEL)
+    print("begin official upload")
+    upload_to_qdrant(chunk_dict["vectors"], chunk_dict["chunks"], conn)
