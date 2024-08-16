@@ -6,10 +6,10 @@ from dotenv import load_dotenv
 from googleapiclient.discovery import build
 import re
 from youtube_transcript_api import YouTubeTranscriptApi
-from typing import Dict, List
 from airflow.decorators import task
 import os
 import json
+from datetime import timedelta
 from data_engineering import utils
 
 load_dotenv()
@@ -119,7 +119,7 @@ def filter_out_shorts(raw_data_path: str) -> str:
     return utils.write_file(DATA_PATH, file_name, videos)
 
 
-@task
+@task(retries=5, retry_delay=timedelta(seconds=15))
 def get_video_transcripts(filtered_path: str) -> str:
     """ Get video transcripts from cleaned videos
 

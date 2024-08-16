@@ -9,13 +9,13 @@ from data_engineering import chunking
 from data_engineering import upload
 
 default_args = {
-    'owner': 'Luis Gallego',
-    'depends_on_past': False,
-    'start_date': datetime(2024, 8, 10),
-    'schedule_interval': '0 0 * * *',
-    'catchup': False,
-    'email_on_failure': False,
-    'email_on_retry': False,
+    # 'owner': 'Luis Gallego',
+    # 'depends_on_past': False,
+    # 'start_date': datetime(2024, 8, 16),
+    # 'schedule_interval': '0 0 * * *',
+    # 'catchup': False,
+    # 'email_on_failure': False,
+    # 'email_on_retry': False,
     # 'retries': 5,
     # 'retry_delay': timedelta(minutes=2)
 }
