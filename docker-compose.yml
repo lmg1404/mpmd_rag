@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  airflow:
+    build:
+      context: ./airflow
+      dockerfile: Dockerfile
+  
+  rag-endpoint:
+    build:
+      context: ./rag
+      dockerfile: Dockerfile
