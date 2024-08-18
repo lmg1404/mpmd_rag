@@ -6,5 +6,4 @@ append="; platform_system==\"Windows\""
 
 pip freeze > $input1
 sed -i 's/\r$//' $input1
-sed -i -E "s/^(grpcio.*==).*/\1${version}/" $input1
-sed -i -E "s/^(pywin32==.*)/\1${append}/" $input1
+sed -i -E "s/^(grpcio.*==).*/\1${version}/; s/^(pywin32==.*)/\1${append}/" $input1
